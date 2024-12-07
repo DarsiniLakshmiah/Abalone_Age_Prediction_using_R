@@ -1,0 +1,142 @@
+---
+title: "Predicting the age of abalone"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: show
+    number_sections: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Methods
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+#Run these commands to install all the required packages for this report
+install.packages("readr")
+install.packages("dplyr")
+install.packages("car")
+install.packages("lmtest")
+install.packages("ggplot2")
+install.packages("GGally")
+install.packages("gridExtra")
+install.packages("MASS")
+install.packages("leaps")
+install.packages("glmnet")
+install.packages("caret")
+install.packages("gbm")
+
+```
+
+```{r Installing/Loading Packages, message=FALSE, warning=FALSE}
+#loading all necessary packages 
+library(readr)
+library(dplyr)
+library(car)
+library(lmtest)
+library(ggplot2)
+library(GGally)
+library(gridExtra)
+library(MASS)
+library(leaps)
+library(glmnet)
+library(caret)
+library(gbm)
+```
+
+### Data summary and statistics
+```{r, message=FALSE, warning=FALSE}
+abalone <- read_csv("Abalone_data.csv")
+
+is.factor(abalone$Sex)
+
+abalone$Sex <- as.factor(abalone$Sex)
+str(abalone, give.attr = FALSE)
+
+library(knitr)
+kable(abalone[1:10,], digits = 4,format = 'markdown')
+```
+
+##### Categorial Variables
+
+| Sex | Number of observations |
+| --- | ---------------------- |
+|  M  | 1527 |
+|  F  | 1307 |
+|  I  | 1342 |
+
+##### Numeric Variables
+
+|      | Length | Diameter | Height | Whole Weight | Shucked Weight  | Viscera Weight | Shell Weight | Rings |
+| ---- | ------ | -------- | ------ | ----- | ------- | ------- | ----- | ----- |
+| Min  | 15.0   | 11.00    | 0.0000 | 0.4   | 0.20    | 0.10    | 0.30  | 1     |
+|Median| 109.0  | 85.00    | 28.00  | 159.9 | 67.20   | 34.20   | 46.80 | 9     |
+| Mean | 104.8  | 81.58    | 27.91  | 165.8 | 71.88   | 36.12   | 47.77 | 9.932 |
+| Max  | 163.0  | 130.00   | 226.00 | 565.1 | 297.60  | 152.00  | 201.00| 29    |
+| Cor  | 0.557  | 0.5750   | 0.5581 | 0.5408| 0.4212  | 0.5043  | 0.6280| 1.000 | 
+ 
+ - Looking at the dataset summary, we can see that data is quite evenly distributed between the three factor levels of `male`, `female` and `infant`. 
+ 
+ - Also from we see that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with Unknown mass of water/blood lost from shucking process. Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+ 
+##### Response variable
+
+- The dependent variable Rings is included in the dataset. It was measured as the number of rings observed after cutting and examining an abalone. Although it does not denote the age of a given abalone directly, it determines it more-or-less perfectly. The age of an abalone equals Rings + 1.5 . Since this relationship holds reliably, Rings will be considered as the dependent variable. The number of rings measured in the data ranges from 1 to 29 and most of the abalone have between 5 and 15 rings. The distribution is slightly positively skewed as well but this does not pose any specific problems for the further analysis. (see plot below)
+
+####Pair Plot
+
+```{r, fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+ggpairs(abalone, aes(colour = Sex, alpha = 0.8), title="Pairs plot for abalone dataset") + 
+  theme_grey(base_size = 8)
+```
+
+####Observations from Pair Plot :
+
+- First thing to note here is high correlation in data. There seems to be high multicollinearity between the predictors. for example correlation between `Diameter` and `Length` is extremely high (about 98.7).
+
+- Similarly `Whole_weight` seems to be highly correlated with other weight predictors and is the sum of `Shucked_weight`, `Viscera_weight` and `Shell_weight`.
+
+- Secondly, the distributions of predictor `Sex` with factor level value of `female` and `male` are very similar with respect to all other predictors.
+
+- The shape of distribution is also significantly similar for factor levels of `female` and `male`.
+
+- We could think about redefining this feature to define gender as infant vs non-infant (where non-infant = female and male both).
+
+- Most of the abalones rings are between 5 and 15.
+
+
+#### Data quality 
+- **Addition of variables**: We will update the abalone dataset to create new variable named `Infant` which will have values based on original value from `Sex` variable. It will have value of `I`, when `Sex` variable is `I` and `NI` otherwise.
+
+```{r, message=FALSE, warning=FALSE}
+abalone['Infant'] <- ifelse(abalone$Sex == 'I','I','NI')
+abalone$Infant <- as.factor(abalone$Infant)
+abalone$Sex <- as.factor(abalone$Sex)
+```
+
+ - Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+
+```{r}
+#Data quality check for height being 0
+kable(abalone[abalone$Height == 0,], digits = 4,format = 'markdown')
+```
+- We see that there are two observations for which `Height` might not be recorded properly as other predictors seems to have valid values. Also if we look at the predictor `Whole_weight`, we see that these values are really small compare to rest of the observation and below first quantile. This tells us that this might not be a data error therefore we can  not exclude these from our dataset.
+
+- We will also add a new variable named `weight.diff`.We can see in the summary that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with unknown mass of water/blood lost from shucking process. 
+
+```{r}
+abalone$weight.diff <- abalone$Whole_weight - (abalone$Viscera_weight + abalone$Shucked_weight + abalone$Shell_weight)
+str(abalone, give.attr = FALSE)
+```
+
+- We see that variable `Whole_weight` should be the linear function of variables `Shucked_weight`, `Viscersa_weight` and `Shell_weight`, and we could write it as `Whole_weight` = `Shucked_weight` + `Viscera_weight`+ `Shell_weight` + unknown mass of water/blood lost from shucking process.
+
+- However when we calculated difference between `Whole_weight` and other weight variables we see that there are `r nrow(abalone[abalone$weight.diff < 0,])` observations that are violating this. i.e. this seems to be a illogical and could be an error while recording data. 
+
+- If we plot the histogram of the newly added `weight.diff` variable, we can see that there are observations when `weight.diff` is negative.
+
