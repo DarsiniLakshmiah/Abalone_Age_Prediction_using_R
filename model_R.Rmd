@@ -1,0 +1,593 @@
+---
+title: "Predicting the Age of Abalone"
+output: html_document
+date: "2024-12-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r,include=FALSE}
+
+install.packages("readr")
+install.packages("dplyr")
+install.packages("car")
+install.packages("lmtest")
+install.packages("ggplot2")
+install.packages("GGally")
+install.packages("gridExtra")
+install.packages("MASS")
+install.packages("leaps")
+install.packages("glmnet")
+install.packages("caret")
+install.packages("gbm")
+
+
+```
+```{r,include=FALSE}
+library(readr)
+library(dplyr)
+library(car)
+library(lmtest)
+library(ggplot2)
+library(GGally)
+library(gridExtra)
+library(MASS)
+library(leaps)
+library(glmnet)
+library(caret)
+library(gbm)
+```
+
+### Data summary and statistics
+
+
+
+```{r}
+
+abalone <- read_csv("C:/Users/darsh/Downloads/Abalone_data.csv")
+```
+
+```{r}
+
+str(abalone, give.attr = FALSE)
+
+abalone$Sex <- as.factor(abalone$Sex)
+
+
+```
+
+```{r}
+library(knitr)
+kable(abalone[1:10,], digits = 4,format = 'markdown')
+
+```
+
+* The dataset summary reveals that the data is fairly balanced across the three factor levels: male, female, and infant.
+
+* Additionally, there are four distinct weight measures: Whole_weight, Shucked_weight, Viscera_weight, and Shell_weight. Whole_weight is a linear function of the       other weight predictors, with the unknown mass of water or blood lost during the shucking process.
+
+* It’s also noted that the minimum value for the Height predictor is 0, which is not realistic, so we will further examine these observations for clarification.
+
+
+```{r}
+library(ggplot2)
+
+ggplot(abalone , aes(x = Rings))+
+
+geom_histogram(binwidth = 0.5, fill = "red", color = "black")+
+  labs(
+    title = "Histogram of Rings",  
+    x = "Values",                 
+    y = "Frequency"               
+  ) +
+  theme_minimal() 
+
+```
+#### Response Variable :
+
+The response variable, Rings, is included in the dataset as the dependent variable. It represents the number of rings observed on an abalone after cutting and examining it. While it doesn’t directly represent the age of the abalone, it is a reliable indicator since the age is approximately equal to Rings + 1.5. Given the strong correlation between Rings and age, Rings will be treated as the dependent variable in our analysis. The number of rings in the dataset ranges from 1 to 29, with most abalones having between 5 and 15 rings. The distribution is slightly positively skewed, but this doesn’t pose any significant issues for further analysis.
+
+### Analysing the relationship between the Predictors and response variable.
+
+```{r}
+
+ggpairs(abalone, aes(colour = Sex, alpha = 0.8), title="Pairs plot for abalone dataset") + 
+  theme_grey(base_size = 8)
+
+
+```
+
+```{r}
+
+numeric_columns <- abalone[sapply(abalone,is.numeric)]
+
+print(numeric_columns)
+
+```
+
+```{r}
+library(corrplot)
+
+correlation_matrix <- cor(numeric_columns)
+
+corrplot(correlation_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.srt = 45)
+
+```
+
+#### Observations :
+
+* First thing to note here is high correlation in data. There seems to be high multicollinearity between the predictors. for example correlation between Diameter and Length is extremely high above 98.7
+
+* Similarly Whole_weight seems to be highly correlated with other weight predictors and is the sum of Shucked_weight, Viscera_weight and Shell_weight.
+
+* Secondly, the distributions of predictor Sex with factor level value of female and male are very similar with respect to all other predictors.
+
+* The shape of distribution is also significantly similar for factor levels of female and male.
+
+* We could think about redefining this feature to define gender as infant vs non-infant (where non-infant = female and male both).
+
+* Most of the abalones rings are between 5 and 15.
+
+
+```{r}
+unique(abalone$Sex)
+
+```
+
+**Addition of variables**: We will update the abalone dataset to create new variable named Infant which will have values based on original value from Sex variable. It will have value of I, when Sex variable is I and NI otherwise.
+
+
+```{r}
+abalone['Infant'] <- ifelse(abalone$Sex == 'I','I','NI')
+abalone$Infant <- as.factor(abalone$Infant)
+abalone$Sex <- as.factor(abalone$Sex)
+```
+```{r}
+str(abalone)
+
+head(abalone)
+```
+
+
+```{r}
+kable(abalone[abalone$Height == 0,], digits = 4,format = 'markdown')
+
+```
+
+* We observed that min value of predictor Height is 0. Practically this is not possible, we will investigate these observations to look closely.
+
+* We see that there are two observations for which Height might not be recorded properly as other predictors seems to have valid values. Also if we look at the predictor Whole_weight, we see that these values are really small compare to rest of the observation and below first quantile. This tells us that this might not be a data error therefore we can not exclude these from our dataset.
+
+```{r}
+library(dplyr)
+
+abalone <- abalone %>%
+  rename(
+      Whole_weight = `Whole weight`,
+      Shucked_weight = `Shucked weight`,
+      Viscera_weight = `Viscera weight`,
+      Shell_weight = `Shell weight`
+  )
+
+```
+
+```{r}
+abalone$weight.diff <- abalone$Whole_weight - (abalone$Viscera_weight + abalone$Shucked_weight + abalone$Shell_weight)
+str(abalone, give.attr = FALSE)
+
+```
+
+```{r}
+nrow(abalone[abalone$weight.diff < 0,])
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(abalone , aes(x = weight.diff))+
+
+geom_histogram(binwidth = 0.5, fill = "skyblue", color = "black")+
+  labs(
+    title = "Histogram of weight.diff",  
+    x = "Values",                 
+    y = "Frequency"               
+  ) +
+  theme_minimal() 
+
+
+
+```
+
+* We see that variable Whole_weight should be the linear function of variables Shucked_weight, Viscersa_weight and Shell_weight, and we could write it as Whole_weight   = Shucked_weight + Viscera_weight+ Shell_weight + unknown mass of water/blood lost from shucking process.
+
+* From the histogram of the newly added weight.diff variable, we can see that there are observations when weight.diff is negative.
+
+* Note that there are total 153 observations that has combined weight of more than Whole_weight. When we looked at 10 such observations, it seems that other values     are correct and there is no similarity so we are sure that this might be an data entry error.Therefore will exclude the negative weight.diff values.
+
+
+```{r}
+abalone <- abalone %>% filter(weight.diff >= 0)
+
+```
+
+
+### Model Building 
+
+#### Train - Test split the data
+
+```{r}
+set.seed(123)
+train_index <- createDataPartition(abalone$Rings, p = 0.8, list = FALSE)
+abalone_train <- abalone[train_index, ]
+abalone_test <- abalone[-train_index, ]
+
+
+```
+
+```{r}
+abalone_01 <- lm(Rings ~ Sex+Length+Diameter+Height+ Whole_weight
+               +Shucked_weight+Viscera_weight
+               +Shell_weight,data = abalone_train)
+summary(abalone_01)
+
+
+```
+```{r}
+# Predict on the training data
+train_pred <- predict(abalone_01, newdata = abalone_train)
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((train_pred - abalone_train$Rings)^2))
+
+print(train_rmse)
+```
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_01, newdata = abalone_test)
+
+# Compute RMSE for the test data
+test_rmse <- sqrt(mean((test_pred - abalone_test$Rings)^2))
+
+print(test_rmse)
+
+print(train_rmse - test_rmse)
+
+```
+```{r}
+faraway::vif(abalone_01)
+
+
+```
+
+Partial Correlation coefficient between whole weight and rings.
+
+
+```{r}
+#check variabolity in high collinearity variables
+whole_weight_fit <- lm(Whole_weight ~ Sex + Length + Diameter + Height + Shucked_weight + Viscera_weight + Shell_weight, data=abalone_train)
+ 
+abalone_01_without_whole_weight <- lm(Rings ~ Sex + Length + Diameter + Height
+               + Shucked_weight + Viscera_weight + Shell_weight,data = abalone_train)
+
+```
+
+```{r}
+# Extract residuals from both models
+residuals_whole_weight <- resid(whole_weight_fit)
+residuals_rings <- resid(abalone_add_without_whole_weight)
+
+# Calculate the correlation between the two residuals
+correlation <- cor(residuals_whole_weight, residuals_rings)
+
+# Print the correlation
+print(correlation)
+
+
+
+```
+
+VIF values after removing the whole weight 
+
+```{r}
+
+faraway::vif(abalone_01_without_whole_weight)
+
+```
+
+Partial correlation coefficient between Diameter & Rings
+
+```{r}
+diameter_fit <- lm(Diameter ~ Sex + Length + Height + Shucked_weight + Viscera_weight + Shell_weight, data=abalone_train)
+ 
+abalone_01_small <- lm(Rings ~ Sex + Length + Height + Shucked_weight + Viscera_weight + Shell_weight,data = abalone_train)
+
+
+```
+
+```{r}
+
+cor(resid(diameter_fit),resid(abalone_01_small))
+
+```
+
+```{r}
+faraway::vif(abalone_01_small)
+
+```
+
+The VIF values are normalized to less than 10 thus reducing the multicollinearity effect in the model.
+
+Not much difference in the model performance even after removing multicollenearity.
+
+```{r}
+summary(abalone_01_small)
+
+
+```
+
+cross validation
+
+No much difference even after removing the Length and Whole_weight which induces multicollenearity.
+```{r}
+
+# Assuming abalone_train is already split
+set.seed(123)
+train_control <- trainControl(method = "cv", number = 10)  # 10 folds
+
+# Define the model
+lm_model <- train(
+  Rings ~ Sex + Diameter + Height +Whole_weight+ Shucked_weight +
+    Viscera_weight + Shell_weight,
+  data = abalone_train,
+  method = "lm",
+  trControl = train_control
+)
+
+# View Results
+print(lm_model)
+
+
+```
+
+Anova test to find the better model
+
+The p-value (< 2.2e-16) shows that the additional predictors (Diameter and Whole_weight) significantly improve the model's fit.
+The F-statistic (73.22) confirms that the improvement in the model is substantial compared to random noise.
+
+select this model 'abalone_01'.
+
+```{r}
+anova(abalone_01_small,abalone_01)
+
+
+```
+
+```{r}
+hist(residuals(abalone_01), 
+     main = "Histogram of Residuals", 
+     xlab = "Residuals", 
+     col = "blue", 
+     breaks = 20)
+
+
+```
+
+Residual VS fitted value analysis
+
+Non-random pattern:
+
+The residuals show a noticeable downward trend initially and then spread upwards, indicating a systematic pattern rather than random scatter around the zero line. This suggests that the model may not fully capture the relationship between the predictors and the response variable.
+Potential heteroscedasticity:
+
+The spread of residuals seems to increase as fitted values increase. This indicates heteroscedasticity, where the variance of residuals is not constant. It violates one of the key assumptions of linear regression.
+Red line slope:
+
+The red line (smoothed trend of residuals) is not flat, further supporting the presence of a systematic pattern.
+Outliers:
+
+There are some residuals far from the zero line, potentially indicating outliers that might influence the model.
+
+```{r}
+
+plot(abalone_01$fitted.values, residuals(abalone_01),
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted Values")
+abline(h = 0, col = "red", lwd = 2)
+
+```
+
+Cooks distance to find the high influencial points 
+
+```{r}
+
+# Calculate Cook's Distance
+cooks_d <- cooks.distance(abalone_01)
+
+# Plot Cook's Distance
+plot(cooks_d, type = "h", main = "Cook's Distance", ylab = "Cook's Distance", xlab = "Index")
+abline(h = 4 / length(cooks_d), col = "red")  # Threshold line (default: 4/n)
+
+
+```
+
+
+```{r}
+
+# Calculate leverage values
+leverage <- hatvalues(abalone_01)
+
+# Plot leverage vs residuals
+plot(leverage, rstudent(abalone_01), main = "Leverage vs. Residuals",
+     xlab = "Leverage", ylab = "Studentized Residuals")
+abline(h = c(-2, 2), col = "red")  # Thresholds for studentized residuals
+abline(v = 2 * mean(leverage), col = "blue")  # Threshold for leverage (2 * mean)
+
+
+
+```
+
+
+```{r}
+# Identify points with high Cook's Distance
+high_cooks <- which(cooks_d > 4 / length(cooks_d))
+
+# Identify points with high leverage (greater than 2 times the mean)
+high_leverage <- which(leverage > 2 * mean(leverage))
+
+# Identify points with large studentized residuals (greater than ±2)
+high_residuals <- which(abs(rstudent(abalone_01)) > 2)
+
+# Combine all influential points
+influential_points <- unique(c(high_cooks, high_leverage, high_residuals))
+
+# Print influential points
+influential_points
+
+
+
+```
+
+
+Removing the influencial point significantly increased the Adjusted R2 and also the RSE . and also made all the predictors significant.both remvoing and keeping the length and whole_weight doesn't significantly affect the model.
+
+```{r}
+# Remove influential points
+abalone_cleaned <- abalone_train[-influential_points, ]
+
+# Refit the model without influential points
+abalone_cleaned_model <- lm(Rings ~ Infant + Diameter + Height + 
+                            Shucked_weight + Viscera_weight + Shell_weight, data = abalone_cleaned)
+
+# Summary of the new model
+summary(abalone_cleaned_model)
+
+
+
+```
+
+
+since the p-value is significantly less this indicates homoskedacity is present in the data lets try to analyze that.
+
+```{r}
+# Install the lmtest package if not already installed
+# install.packages("lmtest")
+
+library(lmtest)
+
+# Perform the Breusch-Pagan test
+bptest(abalone_cleaned_model)
+
+
+
+
+```
+
+```{r}
+# Apply log transformation to the dependent variable (e.g., Rings)
+abalone_log_model <- lm(log(Rings) ~ Infant + Diameter + Height + 
+                        Shucked_weight + Viscera_weight + Shell_weight, data = abalone_cleaned)
+
+# Check summary of the new model
+summary(abalone_log_model)
+
+
+
+```
+
+```{r}
+
+library(lmtest)
+
+# Perform the Breusch-Pagan test
+bptest(abalone_log_model)
+
+```
+
+```{r}
+plot(fitted(abalone_log_model), residuals(abalone_log_model), 
+     xlab = "Fitted Values (log)", ylab = "Residuals",
+     main = "Residuals vs Fitted Values (log-transformed)")
+abline(h = 0, col = "red") 
+
+```
+
+```{r}
+plot(density(residuals(abalone_log_model)),
+     main = "Density Plot of Residuals",
+     xlab = "Residuals")
+
+```
+
+```{r}
+
+# Predict on the training data
+train_pred <- predict(abalone_log_model, newdata = abalone_train[-influential_points, ])
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((train_pred - abalone_train[-influential_points, ]$Rings)^2))
+
+print(train_rmse)
+```
+
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_log_model, newdata = abalone_test[-influential_points, ])
+
+# Compute RMSE for the test data
+test_rmse <- sqrt(mean((test_pred - abalone_train[-influential_points, ]$Rings)^2))
+
+print(test_rmse)
+
+print(train_rmse - test_rmse)
+
+```
+
+predicting the model
+```{r}
+#Take 5 random observations from test data
+
+library(dplyr)
+library(knitr)
+
+dropcol <- c("weight.diff","Infant")
+test_data <- abalone_test[, !(abalone_test %in% dropcol)]
+sample <- sample_n(test_data, 5)
+
+predicted <- round(exp(predict(abalone_log_model, newdata=sample)))
+
+new_df <- data.frame("Actual no of Rings" = c(sample$Rings), 
+                     "Predicted no of Rings" = c(predicted),
+                     "Actual age of abalone" = c(round(sample$Rings + 1.5)), 
+                     "Predicted age of abalone" = round(predicted + 1.5))
+
+kable(new_df, digits = 4,format = 'markdown') 
+
+
+
+```
