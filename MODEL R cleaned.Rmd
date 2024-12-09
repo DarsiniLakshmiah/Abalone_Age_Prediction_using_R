@@ -1,0 +1,434 @@
+---
+title: "scenario 1 with outliers"
+output: html_document
+date: "2024-12-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+
+abalone <- read_csv("C:/Users/darsh/Downloads/Abalone_data.csv")
+```
+```{r}
+
+str(abalone, give.attr = FALSE)
+
+abalone$Sex <- as.factor(abalone$Sex)
+
+
+```
+
+```{r}
+library(dplyr)
+
+abalone <- abalone %>%
+  rename(
+      Whole_weight = `Whole weight`,
+      Shucked_weight = `Shucked weight`,
+      Viscera_weight = `Viscera weight`,
+      Shell_weight = `Shell weight`
+  )
+
+```
+
+```{r}
+abalone$weight.diff <- abalone$Whole_weight - (abalone$Viscera_weight + abalone$Shucked_weight + abalone$Shell_weight)
+str(abalone, give.attr = FALSE)
+
+```
+
+```{r}
+abalone <- abalone %>% filter(weight.diff >= 0)
+
+```
+
+```{r}
+
+head(abalone)
+
+```
+
+
+```{r}
+set.seed(123)
+train_index <- createDataPartition(abalone$Rings, p = 0.8, list = FALSE)
+abalone_train <- abalone[train_index, ]
+abalone_test <- abalone[-train_index, ]
+
+
+```
+
+```{r}
+abalone_01 <- lm(Rings ~ Sex+Length+Diameter+Height+ Whole_weight
+               +Shucked_weight+Viscera_weight
+               +Shell_weight,data = abalone_train)
+summary(abalone_01)
+
+
+```
+```{r}
+# Predict on the training data
+train_pred <- predict(abalone_01, newdata = abalone_train)
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((train_pred - abalone_train$Rings)^2))
+
+print(train_rmse)
+```
+
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_01, newdata = abalone_test)
+
+# Compute RMSE for the test data
+test_rmse <- sqrt(mean((test_pred - abalone_test$Rings)^2))
+
+print(test_rmse)
+
+print(test_rmse - train _rmse)
+
+```
+
+```{r}
+plot(abalone_01 $fitted.values, residuals(abalone_01 ),
+     main = "Residuals vs Fitted", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+
+```
+
+```{r}
+residuals <- residuals(abalone_01)
+
+# Create the QQ plot
+qqnorm(residuals, main = "QQ Plot of Residuals Initial Model")
+qqline(residuals, col = "red")
+
+
+```
+
+
+```{r}
+faraway::vif(abalone_01)
+
+
+```
+
+```{r}
+abalone_02 <- lm(Rings ~ Sex + Diameter + Height + Shucked_weight + Viscera_weight + Shell_weight,data = abalone_train)
+
+summary(abalone_01)
+
+```
+
+```{r}
+faraway::vif(abalone_02)
+
+```
+
+```{r}
+# Predict on the training data
+train_pred <- predict(abalone_02, newdata = abalone_train)
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((train_pred - abalone_train$Rings)^2))
+
+print(train_rmse)
+```
+
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_02, newdata = abalone_test)
+
+# Compute RMSE for the test data
+test_rmse <- sqrt(mean((test_pred - abalone_test$Rings)^2))
+
+print(test_rmse)
+
+```
+
+```{r}
+plot(abalone_02 $fitted.values, residuals(abalone_02 ),
+     main = "Residuals vs Fitted", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+
+```
+
+```{r}
+
+residuals <- residuals(abalone_02)
+
+# Create the QQ plot
+qqnorm(residuals, main = "QQ Plot of Residuals Model 2 ")
+qqline(residuals, col = "red")
+
+```
+
+
+```{r}
+abalone_log_model <- lm(log(Rings) ~ Sex + Diameter + Height + Shucked_weight + Viscera_weight + Shell_weight, data = abalone_train)
+
+
+summary(abalone_log_model)
+```
+```{r}
+# Predict on the training data
+train_pred <- predict(abalone_log_model, newdata = abalone_train)
+
+predicted <- exp(train_pred)
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((predicted - abalone_train$Rings)^2))
+
+print(train_rmse)
+```
+
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_log_model, newdata = abalone_test)
+
+predicted <- exp(test_pred)
+
+# Compute RMSE for the training data
+test_rmse <- sqrt(mean((predicted - abalone_test$Rings)^2))
+
+print(test_rmse)
+
+```
+
+
+```{r}
+
+plot(abalone_log_model $fitted.values, residuals(abalone_log_model ),
+     main = "Residuals vs Fitted (Log transformed)", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+
+```
+
+```{r}
+residuals <- residuals(abalone_log_model)
+
+# Create the QQ plot
+qqnorm(residuals, main = "QQ Plot of Residuals(log transformed)")
+qqline(residuals, col = "red")
+
+```
+```{r}
+library(lmtest)
+
+# Perform the Breusch-Pagan test
+bptest(abalone_log_model)
+
+
+```
+```{r}
+
+# Calculate Cook's Distance
+cooks_d <- cooks.distance(abalone_log_model)
+
+# Plot Cook's Distance
+plot(cooks_d, type = "h", main = "Cook's Distance", ylab = "Cook's Distance", xlab = "Index")
+abline(h = 4 / length(cooks_d), col = "red")  # Threshold line (default: 4/n)
+
+
+
+```
+
+```{r}
+
+# Calculate leverage values
+leverage <- hatvalues(abalone_log_model)
+
+# Plot leverage vs residuals
+plot(leverage, rstudent(abalone_log_model), main = "Leverage vs. Residuals",
+     xlab = "Leverage", ylab = "Studentized Residuals")
+abline(h = c(-2, 2), col = "red")  # Thresholds for studentized residuals
+abline(v = 2 * mean(leverage), col = "blue")  # Threshold for leverage (2 * mean)
+
+
+
+```
+```{r}
+# Identify points with high Cook's Distance
+high_cooks <- which(cooks_d > 4 / length(cooks_d))
+
+# Identify points with high leverage (greater than 2 times the mean)
+high_leverage <- which(leverage > 2 * mean(leverage))
+
+# Identify points with large studentized residuals (greater than ±2)
+high_residuals <- which(abs(rstudent(abalone_log_model)) > 2)
+
+# Combine all influential points
+influential_points <- unique(c(high_cooks, high_leverage, high_residuals))
+
+# Print influential points
+influential_points
+
+
+
+```
+```{r}
+# Remove influential points from the dataset
+abalone_clean <- abalone_train[-influential_points, ]
+
+# Refit the model after removing influential points
+abalone_log_model_refit <- lm(log(Rings) ~ Sex + Diameter + Height + 
+                                 Shucked_weight + Viscera_weight + Shell_weight, 
+                                 data = abalone_clean)
+
+# Check the summary of the refitted model
+summary(abalone_log_model_refit)
+
+
+```
+```{r}
+train_pred <- predict(abalone_log_model_refit, newdata = abalone_clean)
+
+predicted <- exp(train_pred)
+
+# Compute RMSE for the training data
+train_rmse <- sqrt(mean((predicted - abalone_clean$Rings)^2))
+
+print(train_rmse)
+```
+```{r}
+residuals <- residuals(abalone_log_model_refit)
+
+# Create the QQ plot
+qqnorm(residuals, main = "QQ Plot of Residuals(log transformed) Refit model")
+qqline(residuals, col = "red")
+
+```
+```{r}
+
+plot(abalone_log_model_refit $fitted.values, residuals(abalone_log_model_refit ),
+     main = "Residuals vs Fitted (Log transformed)", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+
+```
+
+```{r}
+
+# Predict on the test data
+test_pred <- predict(abalone_log_model_refit, newdata = abalone_test)
+
+predicted <- exp(test_pred)
+
+# Compute RMSE for the training data
+test_rmse <- sqrt(mean((predicted - abalone_test$Rings)^2))
+
+print(test_rmse)
+
+```
+
+```{r}
+
+# Calculate leverage and residuals
+leverage <- hatvalues(abalone_log_model)
+residuals <- residuals(abalone_log_model)
+
+# Identify points with high Cook's Distance
+high_cooks <- which(cooks_d > 4 / length(cooks_d))
+
+# Identify points with high leverage (greater than 2 times the mean)
+high_leverage <- which(leverage > 2 * mean(leverage))
+
+# Identify points with large studentized residuals (greater than ±2)
+high_residuals <- which(abs(rstudent(abalone_log_model)) > 2)
+
+# Combine all influential points
+influential_points <- unique(c(high_cooks, high_leverage, high_residuals))
+
+# Now, plot the data and highlight the influential points
+# For illustration, let's plot Leverage vs Residuals (common for influential point detection)
+plot(leverage, residuals, main = "Leverage vs Residuals", xlab = "Leverage", ylab = "Residuals", 
+     pch = 19, col = "black") # Plot all points in black
+
+# Add points for influential observations
+points(leverage[influential_points], residuals[influential_points], col = "red", pch = 19) # Red for influential points
+
+# Optionally, add a blue line at residuals = 0
+abline(h = 0, col = "blue", lwd = 2)
+
+
+```
+
+Cross validation
+
+```{r}
+# Load the caret library
+library(caret)
+
+# Set up 10-fold cross-validation
+train_control <- trainControl(method = "cv", number = 10)
+
+# Train the linear model with cross-validation
+abalone_cv_model <- train(log(Rings) ~ Sex + Diameter + Height + Shucked_weight + Viscera_weight + Shell_weight, 
+                          data = abalone_clean, 
+                          method = "lm", 
+                          trControl = train_control)
+
+# Print the results of cross-validation
+print(abalone_cv_model)
+
+
+
+# Get the RMSE for each fold
+abalone_cv_model$results
+
+
+
+```
+
+```{r}
+library(dplyr)
+library(knitr)
+
+set.seed(123)
+dropcol <- c("weight.diff","Infant")
+test_data <- abalone_test[, !(abalone_test %in% dropcol)]
+sample <- sample_n(test_data, 10)
+
+predicted <- round(exp(predict(abalone_log_model, newdata=sample)))
+
+new_df <- data.frame("Actual no of Rings" = c(sample$Rings), 
+                     "Predicted no of Rings" = c(predicted),
+                     "Actual age of abalone" = c(round(sample$Rings + 1.5)), 
+                     "Predicted age of abalone" = round(predicted + 1.5))
+
+kable(new_df, digits = 4,format = 'markdown') 
+
+
+
+
+```
