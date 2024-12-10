@@ -44,3 +44,19 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 #### Feature Engineering
 - Applied log transformations to stabilize variance and reduce skewness.
 - Addressed multicollinearity using Variance Inflation Factor (VIF) analysis and removed redundant variables.
+
+### 4.2 Model Development
+#### 4.2.1 Multiple Linear Regression
+- Built a baseline regression model with all predictors.
+- Iteratively refined the model by addressing multicollinearity and heteroscedasticity.
+- Evaluated model assumptions:
+  - Residuals vs. fitted values for homoscedasticity.
+  - Q-Q plot for normality of residuals.
+
+#### 4.2.2 Log-Transformed Regression
+- Applied log transformation to the dependent variable and predictors to improve model fit.
+- Reassessed model assumptions post-transformation.
+
+#### 4.2.3 Decision Tree Regression
+- Built a decision tree model to explore non-linear relationships and interactions.
+- Pruned the tree to prevent overfitting and improve generalization.
