@@ -25,3 +25,11 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 - **Viscera_weight**: Continuous, gut weight after bleeding (in grams).
 - **Shell_weight**: Continuous, shell weight after drying (in grams).
 - **Rings**: Integer, number of shell rings (used to calculate age as `Age = Rings + 1.5`).
+
+## 3. Objectives
+- Develop predictive models to estimate abalone age.
+- Address and resolve challenges such as:
+  - Multicollinearity between predictors.
+  - Heteroscedasticity in residuals.
+  - Outliers and influential observations.
+- Compare the performance of multiple machine learning models.
