@@ -33,3 +33,14 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
   - Heteroscedasticity in residuals.
   - Outliers and influential observations.
 - Compare the performance of multiple machine learning models.
+
+  ## 4. Methodology
+
+### 4.1 Data Preprocessing
+#### Data Cleaning
+- Identified and handled missing or extreme values.
+- Removed influential points using Cook’s Distance, leverage, and studentized residuals.
+
+#### Feature Engineering
+- Applied log transformations to stabilize variance and reduce skewness.
+- Addressed multicollinearity using Variance Inflation Factor (VIF) analysis and removed redundant variables.
