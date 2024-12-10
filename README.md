@@ -60,3 +60,25 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 #### 4.2.3 Decision Tree Regression
 - Built a decision tree model to explore non-linear relationships and interactions.
 - Pruned the tree to prevent overfitting and improve generalization.
+
+### 4.3 Model Evaluation
+Metrics used for evaluation:
+- **Root Mean Squared Error (RMSE)** for prediction accuracy.
+- **R-Squared** for variance explained by the model.
+- **Cross-validation (10-fold)** to ensure robustness.
+
+---
+
+## 5. Results
+
+| Model                      | Train RMSE | Test RMSE | R-Squared |
+|----------------------------|------------|-----------|-----------|
+| Multiple Linear Regression | 2.18       | 2.23      | 0.52      |
+| Log-Transformed Regression | 1.66       | 2.41      | 0.64      |
+| Decision Tree              | 2.34       | 2.48      | 0.40      |
+| Pruned Decision Tree       | 2.34       | 2.48      | 0.40      |
+
+### Analysis of Results
+- The **Log-Transformed Regression Model** demonstrated the best performance, explaining **64% of the variance** in the dependent variable.
+- The **Multiple Linear Regression Model** had the lowest Test RMSE, indicating better generalization to unseen data.
+- The **Decision Tree Models** provided lower predictive accuracy but revealed non-linear interactions.
