@@ -103,3 +103,23 @@ abalone <- abalone %>% filter(Height > 0)
 summary(abalone)
 ```
 
+```{r}
+# Distribution of rings
+ggplot(abalone, aes(x = Rings)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution of Rings", x = "Number of Rings", y = "Frequency")
+
+```
+####Observation: 
+- The histogram shows most abalone have around 10 rings, indicating age. The distribution is right-skewed with fewer abalone having a high number of rings. Ring counts range from 0 to 30, decreasing in frequency with distance from 10.
+
+```{r}
+# Distribution of abalone sex (bar plot)
+ggplot(abalone, aes(x = Sex, fill = Sex)) +
+  geom_bar() +
+  labs(title = "Distribution of Abalone Sex", x = "Sex", y = "Count") +
+  scale_fill_manual(values = c("M" = "blue", "F" = "pink", "I" = "gray"))
+
+```
+#### Observation:
+- The chart "Distribution of Abalone Sex" shows abalones categorized by sex: Female (~1300), Infant (~1200), and Male (~1500). This indicates a higher count of males followed by infants and female.
