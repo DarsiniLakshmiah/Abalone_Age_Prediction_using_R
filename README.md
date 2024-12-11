@@ -64,3 +64,12 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 #### 4.2.3 Decision Tree Regression
 - Built a decision tree model to explore non-linear relationships and interactions.
 - Pruned the tree to prevent overfitting and improve generalization.
+  
+
+  ### 4.3 Model Evaluation
+Metrics used for evaluation:
+- **Root Mean Squared Error (RMSE)** for prediction accuracy.
+- **R-Squared** for variance explained by the model.
+- **Cross-validation (10-fold)** to ensure robustness.
+
+---
