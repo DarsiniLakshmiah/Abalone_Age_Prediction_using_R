@@ -73,3 +73,11 @@ Metrics used for evaluation:
 - **Cross-validation (10-fold)** to ensure robustness.
 
 ---
+## 5. Results
+
+| Model                      | Train RMSE | Test RMSE | R-Squared |
+|----------------------------|------------|-----------|-----------|
+| Multiple Linear Regression | 2.18       | 2.23      | 0.52      |
+| Log-Transformed Regression | 1.66       | 2.41      | 0.64      |
+| Decision Tree              | 2.34       | 2.48      | 0.40      |
+| Pruned Decision Tree       | 2.34       | 2.48      | 0.40      |
