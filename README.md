@@ -25,6 +25,7 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 - **Viscera_weight**: Continuous, gut weight after bleeding (in grams).
 - **Shell_weight**: Continuous, shell weight after drying (in grams).
 - **Rings**: Integer, number of shell rings (used to calculate age as `Age = Rings + 1.5`).
+  
 
 ---
 
@@ -87,3 +88,20 @@ Metrics used for evaluation:
 - The **Multiple Linear Regression Model** had the lowest Test RMSE, indicating better generalization to unseen data.
 - The **Decision Tree Models** provided lower predictive accuracy but revealed non-linear interactions.
 
+---
+
+## 6. Challenges and Solutions
+
+### 6.1 Multicollinearity
+- **Issue**: High VIF values indicated redundancy among predictors.
+- **Solution**: Removed highly correlated variables, retaining key predictors like Diameter, Height, and Shell_weight.
+
+### 6.2 Heteroscedasticity
+- **Issue**: Funnel-shaped residuals vs fitted values plot.
+- **Solution**: Applied log transformation to the dependent variable and predictors.
+
+### 6.3 Influential Points
+- **Issue**: Outliers identified via Cook’s Distance and leverage plots distorted model coefficients.
+- **Solution**: Removed these points and refitted the model.
+
+---
