@@ -118,3 +118,9 @@ The **Log-Transformed Regression Model** emerged as the most robust, explaining 
 - Incorporate additional features like environmental data to enhance model performance.
 
 ---
+## 8. Visualizations and Plots
+- **Correlation Matrix**: Visualized relationships between predictors to identify multicollinearity.
+- **Residual Plots**: Evaluated homoscedasticity and normality assumptions.
+- **Decision Tree Diagram**: Illustrated splits and feature importance.
+
+---
