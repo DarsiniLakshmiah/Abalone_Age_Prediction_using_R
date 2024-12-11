@@ -1,4 +1,4 @@
-# Abalone Age Prediction Usinf Machine Learning
+# Abalone Age Prediction Using Machine Learning
 
 ## 1. Introduction
 
@@ -25,3 +25,26 @@ The dataset is obtained from the **UCI Machine Learning Repository**, containing
 - **Viscera_weight**: Continuous, gut weight after bleeding (in grams).
 - **Shell_weight**: Continuous, shell weight after drying (in grams).
 - **Rings**: Integer, number of shell rings (used to calculate age as `Age = Rings + 1.5`).
+
+---
+
+  ## 3. Objectives
+- Develop predictive models to estimate abalone age.
+- Address and resolve challenges such as:
+  - Multicollinearity between predictors.
+  - Heteroscedasticity in residuals.
+  - Outliers and influential observations.
+- Compare the performance of multiple machine learning models.
+
+---
+
+## 4. Methodology
+
+### 4.1 Data Preprocessing
+#### Data Cleaning
+- Identified and handled missing or extreme values.
+- Removed influential points using Cook’s Distance, leverage, and studentized residuals.
+
+#### Feature Engineering
+- Applied log transformations to stabilize variance and reduce skewness.
+- Addressed multicollinearity using Variance Inflation Factor (VIF) analysis and removed redundant variables.
