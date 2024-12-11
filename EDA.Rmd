@@ -49,7 +49,7 @@ library(gbm)
 
 
 ```{r}
-
+# Corrected file path with forward slashes
 abalone=read.csv("D:/Githubfordatamining/FA24-DATS6101-11/HW/Abalone_data.csv")
 head(abalone)
 
