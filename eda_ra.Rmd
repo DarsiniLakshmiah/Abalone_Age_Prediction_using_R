@@ -91,3 +91,15 @@ kable(abalone[1:10,], digits = 4,format = 'markdown')
 
 - The dependent variable Rings is included in the dataset. It was measured as the number of rings observed after cutting and examining an abalone. Although it does not denote the age of a given abalone directly, it determines it more-or-less perfectly. The age of an abalone equals Rings + 1.5 . Since this relationship holds reliably, Rings will be considered as the dependent variable. The number of rings measured in the data ranges from 1 to 29 and most of the abalone have between 5 and 15 rings. The distribution is slightly positively skewed as well but this does not pose any specific problems for the further analysis. (see plot below)
 ####################################################################
+
+#EDA in here between pair plot and preprocessing
+"
+```{r}
+abalone <- abalone %>% filter(Height > 0)
+
+```
+
+```{r}
+summary(abalone)
+```
+
