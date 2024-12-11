@@ -123,3 +123,13 @@ ggplot(abalone, aes(x = Sex, fill = Sex)) +
 ```
 #### Observation:
 - The chart "Distribution of Abalone Sex" shows abalones categorized by sex: Female (~1300), Infant (~1200), and Male (~1500). This indicates a higher count of males followed by infants and female.
+
+```{r}
+# Whole weight vs Rings (scatterplot)
+ggplot(abalone, aes(x = `Whole weight`, y = Rings, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Whole Weight vs Rings", x = "Whole Weight", y = "Rings")
+```
+#### Observation:
+- The scatter plot shows that abalone ring count generally increases with whole weight, though there is considerable variability. Females, infants, and males are color-coded, showing their distribution. This indicates weight might be a significant predictor of age.
+
