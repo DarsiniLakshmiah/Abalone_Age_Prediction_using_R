@@ -105,3 +105,16 @@ Metrics used for evaluation:
 - **Solution**: Removed these points and refitted the model.
 
 ---
+## 7. Conclusion
+### Best Model
+The **Log-Transformed Regression Model** emerged as the most robust, explaining the highest variance while effectively addressing model assumptions.
+
+### Insights
+- **Shell_weight** and **Diameter** are the strongest predictors of abalone age.
+- Transformations and data cleaning significantly improved model stability and performance.
+
+### Future Work
+- Explore ensemble methods (e.g., Random Forests) to improve predictive accuracy.
+- Incorporate additional features like environmental data to enhance model performance.
+
+---
