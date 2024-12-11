@@ -81,3 +81,9 @@ Metrics used for evaluation:
 | Log-Transformed Regression | 1.66       | 2.41      | 0.64      |
 | Decision Tree              | 2.34       | 2.48      | 0.40      |
 | Pruned Decision Tree       | 2.34       | 2.48      | 0.40      |
+
+### Analysis of Results
+- The **Log-Transformed Regression Model** demonstrated the best performance, explaining **64% of the variance** in the dependent variable.
+- The **Multiple Linear Regression Model** had the lowest Test RMSE, indicating better generalization to unseen data.
+- The **Decision Tree Models** provided lower predictive accuracy but revealed non-linear interactions.
+
