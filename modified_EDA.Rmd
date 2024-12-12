@@ -110,6 +110,36 @@ The dependent variable, Rings, is included in the dataset and represents the num
 
 
 
+```{r}
+library(ggplot2)
+library(gridExtra) 
+library(grid)     
+
+numeric_features <- colnames(abalone)[sapply(abalone, is.numeric)]
+# Create a list to store individual ggplot objects
+plots <- list()
+
+# Generate histograms for each numeric feature
+for (i in seq_along(numeric_features)) {
+  num_feat <- numeric_features[i]
+  p <- ggplot(abalone, aes_string(x = num_feat)) +
+    geom_histogram(aes(y = ..density..), color = "gray", 
+                   fill = scales::hue_pal()(length(numeric_features))[i], bins = 30) +
+    geom_density(color = "black", size = 1) +
+    labs(title = paste("Distribution of", num_feat),
+         x = num_feat,
+         y = "Density") +
+    theme_minimal(base_size = 12) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  
+  # Print each plot to check
+  print(p)
+  
+  # Store the plot in the list
+  plots[[i]] <- p
+}
+
+```
 
 ```{r}
 library(ggplot2)
