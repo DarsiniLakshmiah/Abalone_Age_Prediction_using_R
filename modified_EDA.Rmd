@@ -363,3 +363,26 @@ for (feature in top_features) {
 ```
 
 All four features—shell weight, diameter, height, and length—show positive correlations with Rings, indicating that larger and heavier abalones tend to be older. However, the presence of variability and outliers suggests that while these features are good predictors, they may need to be combined with others or processed (e.g., outlier handling) for more accurate modeling
+```{r}
+
+correlation_with_target_df <- data.frame(
+  Feature = names(correlation_with_target),
+  Correlation = round(correlation_with_target, 2)  # Round to 2 decimal places
+)
+
+# Order by descending correlation
+correlation_with_target_df <- correlation_with_target_df[order(-correlation_with_target_df$Correlation), ]
+
+
+
+library(knitr)
+
+# Display the correlation table nicely formatted
+kable(correlation_with_target_df, col.names = c("Feature", "Correlation"), align = "c")
+
+
+```
+From the above correlation we can see that the strongest predictors of Rings are Shell Weight, Diameter, Height, and Length. These features will likely play a significant role in regression or machine learning models.
+While all features show some positive correlation with Rings, Shucked Weight is the weakest and may have limited predictive power.
+Consider these relationships when selecting features for building models like regression, SVM, or tree-based methods.
+
