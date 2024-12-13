@@ -217,4 +217,15 @@ ggplot(abalone_no_sex, aes(x = Length)) + geom_histogram(binwidth = 0.5, fill = 
  
 #### Observation:
 -The histogram shows the frequency of abalone lengths. Most lengths are centered around 0.5, with very few at the extremes (0.0 and 1.0). This indicates that the abalone in your dataset generally have similar lengths.
+
+```{r}
+# Scatter plot with trendline for Rings vs Length
+ggplot(abalone_no_sex, aes(x = Length, y = Rings)) + 
+  geom_point(alpha = 0.6) + 
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+  labs(title = "Rings vs Length", x = "Length", y = "Rings")
+
+```
+#### Observation:
+- The scatter plot indicates a positive correlation between length and the number of rings. As length increases, ring count (age proxy) also tends to increase, shown by the data points and linear trend line.
  
