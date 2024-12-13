@@ -340,7 +340,7 @@ faraway::vif(abalone_01_small)
 
 ```
 
-The VIF values are normalized to less than 10 thus reducing the multicollinearity effect in the model.
+The VIF values are normalized to less than 10/ Close to 10thus reducing the multicollinearity effect in the model.
 
 Not much difference in the model performance even after removing multicollenearity.
 
