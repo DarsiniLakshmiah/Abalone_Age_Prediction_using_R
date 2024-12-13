@@ -13,3 +13,303 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+## Methods
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+#Run these commands to install all the required packages for this report
+install.packages("readr")
+install.packages("dplyr")
+install.packages("car")
+install.packages("lmtest")
+install.packages("ggplot2")
+install.packages("GGally")
+install.packages("gridExtra")
+install.packages("MASS")
+install.packages("leaps")
+install.packages("glmnet")
+install.packages("caret")
+install.packages("gbm")
+install.packages("gplots")
+
+```
+
+```{r Installing/Loading Packages, message=FALSE, warning=FALSE}
+#loading all necessary packages 
+library(readr)
+library(dplyr)
+library(car)
+library(lmtest)
+library(ggplot2)
+library(GGally)
+library(gridExtra)
+library(MASS)
+library(leaps)
+library(glmnet)
+library(caret)
+library(gbm)
+library(gplots)
+```
+
+### Data summary and statistics
+
+```{r, message=FALSE, warning=FALSE}
+abalone <- read_csv("Abalone_data.csv")
+
+is.factor(abalone$Sex)
+
+abalone$Sex <- as.factor(abalone$Sex)
+str(abalone, give.attr = FALSE)
+
+library(knitr)
+kable(abalone[1:10,], digits = 4,format = 'markdown')
+```
+
+##### Categorial Variables
+
+| Sex | Number of observations |
+| --- | ---------------------- |
+|  M  | 1527 |
+|  F  | 1307 |
+|  I  | 1342 |
+
+##### Numeric Variables
+
+|      | Length | Diameter | Height | Whole Weight | Shucked Weight  | Viscera Weight | Shell Weight | Rings |
+| ---- | ------ | -------- | ------ | ----- | ------- | ------- | ----- | ----- |
+| Min  | 15.0   | 11.00    | 0.0000 | 0.4   | 0.20    | 0.10    | 0.30  | 1     |
+|Median| 109.0  | 85.00    | 28.00  | 159.9 | 67.20   | 34.20   | 46.80 | 9     |
+| Mean | 104.8  | 81.58    | 27.91  | 165.8 | 71.88   | 36.12   | 47.77 | 9.932 |
+| Max  | 163.0  | 130.00   | 226.00 | 565.1 | 297.60  | 152.00  | 201.00| 29    |
+| Cor  | 0.557  | 0.5750   | 0.5581 | 0.5408| 0.4212  | 0.5043  | 0.6280| 1.000 | 
+ 
+ - Looking at the dataset summary, we can see that data is quite evenly distributed between the three factor levels of `male`, `female` and `infant`. 
+ 
+ - Also from we see that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with Unknown mass of water/blood lost from shucking process. Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+ 
+##### Response variable
+
+- The dependent variable Rings is included in the dataset. It was measured as the number of rings observed after cutting and examining an abalone. Although it does not denote the age of a given abalone directly, it determines it more-or-less perfectly. The age of an abalone equals Rings + 1.5 . Since this relationship holds reliably, Rings will be considered as the dependent variable. The number of rings measured in the data ranges from 1 to 29 and most of the abalone have between 5 and 15 rings. The distribution is slightly positively skewed as well but this does not pose any specific problems for the further analysis. (see plot below)
+####################################################################
+"
+#EDA in here between pair plot and preprocessing
+"
+```{r}
+abalone <- abalone %>% filter(Height > 0)
+
+```
+
+```{r}
+summary(abalone)
+```
+
+
+```{r}
+# Distribution of rings
+ggplot(abalone, aes(x = Rings)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution of Rings", x = "Number of Rings", y = "Frequency")
+
+```
+####Observation: 
+- The histogram shows most abalone have around 10 rings, indicating age. The distribution is right-skewed with fewer abalone having a high number of rings. Ring counts range from 0 to 30, decreasing in frequency with distance from 10.
+
+```{r}
+# Distribution of abalone sex (bar plot)
+ggplot(abalone, aes(x = Sex, fill = Sex)) +
+  geom_bar() +
+  labs(title = "Distribution of Abalone Sex", x = "Sex", y = "Count") +
+  scale_fill_manual(values = c("M" = "blue", "F" = "pink", "I" = "gray"))
+
+```
+#### Observation:
+- The chart "Distribution of Abalone Sex" shows abalones categorized by sex: Female (~1300), Infant (~1200), and Male (~1500). This indicates a higher count of males followed by infants and female.
+
+
+```{r}
+# Whole weight vs Rings (scatterplot)
+ggplot(abalone, aes(x = `Whole weight`, y = Rings, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Whole Weight vs Rings", x = "Whole Weight", y = "Rings")
+```
+#### Observation:
+- The scatter plot shows that abalone ring count generally increases with whole weight, though there is considerable variability. Females, infants, and males are color-coded, showing their distribution. This indicates weight might be a significant predictor of age.
+
+
+```{r}
+# Height Distribution by sex (Box plot)
+ggplot(abalone, aes(x = Sex, y = Height, fill = Sex)) +
+  geom_boxplot() +
+  labs(title = "Height Distribution by Sex", x = "Sex", y = "Height")
+```
+#### Observation:
+- The box plot shows the height distribution by sex (F: female, I: infant, M: male). It highlights the median, quartiles, and potential outliers for each category. Males tend to have slightly higher median heights compared to females and infants. This variation in height could be considered when predicting abalone age.
+
+
+```{r}
+# Whole weight vs Cobined Shucked and Viscera Weight (Scatter Plot)
+ggplot(abalone, aes(x = `Whole weight`, y = `Shucked weight` + `Viscera weight`, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Whole Weight vs Combined Shucked and Viscera Weight", x = "Whole Weight", y = "Shucked + Viscera Weight")
+
+```
+
+#### Observation:
+- This scatter plot shows a positive correlation between whole weight and combined shucked plus viscera weight of abalones. Different colors represent the sexes: females (red), infants (green), and males (blue).This relationship suggests whole weight could help predict shucked weight.
+
+
+```{r}
+# Distribution of Rings by sex (Violin Plot)
+ggplot(abalone, aes(x = Sex, y = Rings, fill = Sex)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  labs(
+    title = "Distribution of Rings by Sex",
+    x = "Sex",
+    y = "Rings"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+```
+
+### Observation:
+- The plot highlights the density of rings within each category. Males and females have similar distributions, while infants show a narrower spread. The variation in age across sexes is evident.
+
+```{r}
+abalone_no_sex <- abalone[, !names(abalone) %in% c("Sex","Infant")]
+
+# Display the first few rows of the new dataset
+head(abalone_no_sex)
+```
+
+```{r}
+cor_matrix <- cor(abalone_no_sex)
+print(cor_matrix)
+```
+
+```{r}
+
+# Load the gplots library
+library(gplots)
+
+# Calculate the correlation matrix (exclude 'Sex' and 'Infant')
+cor_matrix <- cor(abalone_no_sex)
+
+# Draw the heatmap with correlation numbers
+heatmap.2(cor_matrix, 
+          main = "Heatmap of Correlation Matrix", 
+          col = colorRampPalette(c("blue", "white", "red"))(50), # Color gradient
+          scale = "none", # Don't scale the data
+          trace = "none", # Remove the trace lines
+          dendrogram = "none", # No clustering
+          margins = c(8, 8), # Adjust margins for better label visibility
+          cexRow = 0.8, # Font size for row labels
+          cexCol = 0.8, # Font size for column labels
+          cellnote = round(cor_matrix, 2), # Round correlation values to 2 decimal places
+          notecol = "black", # Color of the numbers
+          notecex = 0.8) # Size of the numbers
+
+```
+ 
+```{r}
+# Plotting histogram for 'Length' and 'Rings'
+ggplot(abalone_no_sex, aes(x = Length)) + geom_histogram(binwidth = 0.5, fill = "blue", color = "black") + 
+  labs(title = "Length Distribution", x = "Length", y = "Frequency")
+
+```
+ 
+#### Observation:
+-The histogram shows the frequency of abalone lengths. Most lengths are centered around 0.5, with very few at the extremes (0.0 and 1.0). This indicates that the abalone in your dataset generally have similar lengths.
+ 
+```{r}
+# Scatter plot with trendline for Rings vs Length
+ggplot(abalone_no_sex, aes(x = Length, y = Rings)) + 
+  geom_point(alpha = 0.6) + 
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+  labs(title = "Rings vs Length", x = "Length", y = "Rings")
+
+```
+#### Observation:
+- The scatter plot indicates a positive correlation between length and the number of rings. As length increases, ring count (age proxy) also tends to increase, shown by the data points and linear trend line.
+ 
+```{r}
+# Standardizing the data before PCA
+abalone_scaled <- scale(abalone_no_sex)
+pca <- prcomp(abalone_scaled)
+summary(pca)
+```
+ 
+```{r}
+# Boxplot for outlier detection on Rings
+ggplot(abalone_no_sex, aes(y = Rings)) + 
+  geom_boxplot(fill = "orange", color = "black") + 
+  labs(title = "Rings Outlier Detection", y = "Rings")
+
+
+```
+ 
+#### Observation:
+- The box plot highlights outliers in the dataset related to rings. It shows that the majority of abalone have ring counts within a certain range, but there are several outliers with significantly higher or lower ring counts.
+
+##################################################################
+####Pair Plot
+
+```{r, fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+ggpairs(abalone, aes(colour = Sex, alpha = 0.8), title="Pairs plot for abalone dataset") + 
+  theme_grey(base_size = 8)
+```
+
+####Observations from Pair Plot :
+
+- First thing to note here is high correlation in data. There seems to be high multicollinearity between the predictors. for example correlation between `Diameter` and `Length` is extremely high (about 98.7).
+
+- Similarly `Whole_weight` seems to be highly correlated with other weight predictors and is the sum of `Shucked_weight`, `Viscera_weight` and `Shell_weight`.
+
+- Secondly, the distributions of predictor `Sex` with factor level value of `female` and `male` are very similar with respect to all other predictors.
+
+- The shape of distribution is also significantly similar for factor levels of `female` and `male`.
+
+- We could think about redefining this feature to define gender as infant vs non-infant (where non-infant = female and male both).
+
+- Most of the abalones rings are between 5 and 15.
+
+
+#### Data quality 
+- **Addition of variables**: We will update the abalone dataset to create new variable named `Infant` which will have values based on original value from `Sex` variable. It will have value of `I`, when `Sex` variable is `I` and `NI` otherwise.
+
+```{r, message=FALSE, warning=FALSE}
+abalone['Infant'] <- ifelse(abalone$Sex == 'I','I','NI')
+abalone$Infant <- as.factor(abalone$Infant)
+abalone$Sex <- as.factor(abalone$Sex)
+```
+
+ - Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+
+```{r}
+#Data quality check for height being 0
+kable(abalone[abalone$Height == 0,], digits = 4,format = 'markdown')
+```
+- We see that there are two observations for which `Height` might not be recorded properly as other predictors seems to have valid values. Also if we look at the predictor `Whole_weight`, we see that these values are really small compare to rest of the observation and below first quantile. This tells us that this might not be a data error therefore we can  not exclude these from our dataset.
+
+- We will also add a new variable named `weight.diff`.We can see in the summary that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with unknown mass of water/blood lost from shucking process. 
+
+```{r}
+abalone$weight.diff <- abalone$Whole_weight - (abalone$Viscera_weight + abalone$Shucked_weight + abalone$Shell_weight)
+str(abalone, give.attr = FALSE)
+```
+
+- We see that variable `Whole_weight` should be the linear function of variables `Shucked_weight`, `Viscersa_weight` and `Shell_weight`, and we could write it as `Whole_weight` = `Shucked_weight` + `Viscera_weight`+ `Shell_weight` + unknown mass of water/blood lost from shucking process.
+
+- However when we calculated difference between `Whole_weight` and other weight variables we see that there are `r nrow(abalone[abalone$weight.diff < 0,])` observations that are violating this. i.e. this seems to be a illogical and could be an error while recording data. 
+
+- If we plot the histogram of the newly added `weight.diff` variable, we can see that there are observations when `weight.diff` is negative.
+
+
+
+```{r}
+# Compute the correlation matrix
+cor_matrix <- cor(abalone_no_sex)
+
+# Display the correlation matrix
+print(cor_matrix)
+
+```
