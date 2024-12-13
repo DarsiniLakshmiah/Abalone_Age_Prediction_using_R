@@ -299,6 +299,7 @@ ggplot(category_counts, aes(x = "", y = Percentage, fill = .data[[categoric_feat
 
 As it is indicated in the pie chart the distribution is fairly balanced across the three categories, with males slightly outnumbering the other two groups. from this we can say that sex-based analysis can be conducted without any major skew between groups.
 
+From the above pair plot we can see that their is  strong positive correlations between physical dimensions (Length, Diameter, Height) and Shell Weight, with larger abalones having heavier shells, and distributions varying slightly by sex.There is also strong correlations among Whole Weight, Shucked Weight, and Viscera Weight, while the correlation between Rings and these weights is moderate, particularly higher for "Infants" compared to "Males" and "Females." The Boxplots show that "Infants" have a wider spread in Rings, indicating more variability in age, whereas "Males" and "Females" show more consistent ranges.
 
 ```{r}
 library(reshape2)
