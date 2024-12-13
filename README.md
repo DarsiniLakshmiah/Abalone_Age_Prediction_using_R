@@ -124,7 +124,4 @@ The **Log-Transformed Regression Model** emerged as the most robust, explaining 
 - **Decision Tree Diagram**: Illustrated splits and feature importance.
 
 ---
-## 9. References
-1. Dua, D., & Graff, C. (2019). UCI Machine Learning Repository: Abalone Data Set.
-2. James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). *An Introduction to Statistical Learning*. Springer.
-3. Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python.
+
