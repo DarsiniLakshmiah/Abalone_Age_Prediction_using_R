@@ -150,4 +150,24 @@ ggplot(abalone, aes(x = `Whole weight`, y = `Shucked weight` + `Viscera weight`,
   geom_point(alpha = 0.6) +
   labs(title = "Whole Weight vs Combined Shucked and Viscera Weight", x = "Whole Weight", y = "Shucked + Viscera Weight")
 
+```                                              
+#### Observation:
+- This scatter plot shows a positive correlation between whole weight and combined shucked plus viscera weight of abalones. Different colors represent the sexes: females (red), infants (green), and males (blue).This relationship suggests whole weight could help predict shucked weight.
+
+
+```{r}
+# Distribution of Rings by sex (Violin Plot)
+ggplot(abalone, aes(x = Sex, y = Rings, fill = Sex)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  labs(
+    title = "Distribution of Rings by Sex",
+    x = "Sex",
+    y = "Rings"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
 ```
+
+### Observation:
+- The plot highlights the density of rings within each category. Males and females have similar distributions, while infants show a narrower spread. The variation in age across sexes is evident.
