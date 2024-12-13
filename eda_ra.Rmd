@@ -171,3 +171,10 @@ ggplot(abalone, aes(x = Sex, y = Rings, fill = Sex)) +
 
 ### Observation:
 - The plot highlights the density of rings within each category. Males and females have similar distributions, while infants show a narrower spread. The variation in age across sexes is evident.
+
+```{r}
+abalone_no_sex <- abalone[, !names(abalone) %in% c("Sex","Infant")]
+
+# Display the first few rows of the new dataset
+head(abalone_no_sex)
+```
