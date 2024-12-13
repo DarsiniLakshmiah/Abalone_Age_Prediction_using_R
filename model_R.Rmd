@@ -85,7 +85,7 @@ kable(abalone[1:10,], digits = 4,format = 'markdown')
 
 ```
 
-* The dataset summary reveals that the data is fairly balanced across the three factor levels: male, female, and infant.
+* The dataset summary reveals that the data is fairly balanced across the three factor levels: male,female and infant.
 
 * Additionally, there are four distinct weight measures: Whole_weight, Shucked_weight, Viscera_weight, and Shell_weight. Whole_weight is a linear function of the       other weight predictors, with the unknown mass of water or blood lost during the shucking process.
 
