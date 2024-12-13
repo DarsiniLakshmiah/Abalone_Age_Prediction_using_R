@@ -1,0 +1,135 @@
+---
+title: "Predicting the age of abalone"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: show
+    number_sections: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Methods
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+#Run these commands to install all the required packages for this report
+install.packages("readr")
+install.packages("dplyr")
+install.packages("car")
+install.packages("lmtest")
+install.packages("ggplot2")
+install.packages("GGally")
+install.packages("gridExtra")
+install.packages("MASS")
+install.packages("leaps")
+install.packages("glmnet")
+install.packages("caret")
+install.packages("gbm")
+install.packages("gplots")
+
+```
+
+```{r Installing/Loading Packages, message=FALSE, warning=FALSE}
+#loading all necessary packages 
+library(readr)
+library(dplyr)
+library(car)
+library(lmtest)
+library(ggplot2)
+library(GGally)
+library(gridExtra)
+library(MASS)
+library(leaps)
+library(glmnet)
+library(caret)
+library(gbm)
+library(gplots)
+```
+
+### Data summary and statistics
+
+```{r, message=FALSE, warning=FALSE}
+abalone <- read_csv("Abalone_data.csv")
+
+is.factor(abalone$Sex)
+
+abalone$Sex <- as.factor(abalone$Sex)
+str(abalone, give.attr = FALSE)
+
+library(knitr)
+kable(abalone[1:10,], digits = 4,format = 'markdown')
+```
+
+##### Categorial Variables
+
+| Sex | Number of observations |
+| --- | ---------------------- |
+|  M  | 1527 |
+|  F  | 1307 |
+|  I  | 1342 |
+
+##### Numeric Variables
+
+|      | Length | Diameter | Height | Whole Weight | Shucked Weight  | Viscera Weight | Shell Weight | Rings |
+| ---- | ------ | -------- | ------ | ----- | ------- | ------- | ----- | ----- |
+| Min  | 15.0   | 11.00    | 0.0000 | 0.4   | 0.20    | 0.10    | 0.30  | 1     |
+|Median| 109.0  | 85.00    | 28.00  | 159.9 | 67.20   | 34.20   | 46.80 | 9     |
+| Mean | 104.8  | 81.58    | 27.91  | 165.8 | 71.88   | 36.12   | 47.77 | 9.932 |
+| Max  | 163.0  | 130.00   | 226.00 | 565.1 | 297.60  | 152.00  | 201.00| 29    |
+| Cor  | 0.557  | 0.5750   | 0.5581 | 0.5408| 0.4212  | 0.5043  | 0.6280| 1.000 | 
+ 
+ - Looking at the dataset summary, we can see that data is quite evenly distributed between the three factor levels of `male`, `female` and `infant`. 
+ 
+ - Also from we see that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with Unknown mass of water/blood lost from shucking process. Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+ 
+##### Response variable
+
+- The dependent variable Rings is included in the dataset. It was measured as the number of rings observed after cutting and examining an abalone. Although it does not denote the age of a given abalone directly, it determines it more-or-less perfectly. The age of an abalone equals Rings + 1.5 . Since this relationship holds reliably, Rings will be considered as the dependent variable. The number of rings measured in the data ranges from 1 to 29 and most of the abalone have between 5 and 15 rings. The distribution is slightly positively skewed as well but this does not pose any specific problems for the further analysis. (see plot below)
+####################################################################
+
+#EDA in here between pair plot and preprocessing
+"
+```{r}
+abalone <- abalone %>% filter(Height > 0)
+
+```
+
+```{r}
+summary(abalone)
+```
+
+```{r}
+# Distribution of rings
+ggplot(abalone, aes(x = Rings)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution of Rings", x = "Number of Rings", y = "Frequency")
+
+```
+####Observation: 
+- The histogram shows most abalone have around 10 rings, indicating age. The distribution is right-skewed with fewer abalone having a high number of rings. Ring counts range from 0 to 30, decreasing in frequency with distance from 10.
+
+```{r}
+# Distribution of abalone sex (bar plot)
+ggplot(abalone, aes(x = Sex, fill = Sex)) +
+  geom_bar() +
+  labs(title = "Distribution of Abalone Sex", x = "Sex", y = "Count") +
+  scale_fill_manual(values = c("M" = "blue", "F" = "pink", "I" = "gray"))
+
+```
+#### Observation:
+- The chart "Distribution of Abalone Sex" shows abalones categorized by sex: Female (~1300), Infant (~1200), and Male (~1500). This indicates a higher count of males followed by infants and female.
+
+```{r}
+# Whole weight vs Rings (scatterplot)
+ggplot(abalone, aes(x = `Whole weight`, y = Rings, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Whole Weight vs Rings", x = "Whole Weight", y = "Rings")
+```
+#### Observation:
+- The scatter plot shows that abalone ring count generally increases with whole weight, though there is considerable variability. Females, infants, and males are color-coded, showing their distribution. This indicates weight might be a significant predictor of age.
+
