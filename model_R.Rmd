@@ -158,7 +158,7 @@ unique(abalone$Sex)
 
 ```
 
-**Addition of variables**: We will update the abalone dataset to create new variable named Infant which will have values based on original value from Sex variable. It will have value of I, when Sex variable is I and NI otherwise.
+**Addition of variables**: We will update the abalone dataset to create new variable named Infant which will have values based on original value from Sex variable. It will have value of I and when Sex variable is I and NI otherwise.
 
 
 ```{r}
