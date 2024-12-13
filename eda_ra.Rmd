@@ -178,3 +178,32 @@ abalone_no_sex <- abalone[, !names(abalone) %in% c("Sex","Infant")]
 # Display the first few rows of the new dataset
 head(abalone_no_sex)
 ```
+
+```{r}
+cor_matrix <- cor(abalone_no_sex)
+print(cor_matrix)
+```
+
+```{r}
+
+# Load the gplots library
+library(gplots)
+
+# Calculate the correlation matrix (exclude 'Sex' and 'Infant')
+cor_matrix <- cor(abalone_no_sex)
+
+# Draw the heatmap with correlation numbers
+heatmap.2(cor_matrix, 
+          main = "Heatmap of Correlation Matrix", 
+          col = colorRampPalette(c("blue", "white", "red"))(50), # Color gradient
+          scale = "none", # Don't scale the data
+          trace = "none", # Remove the trace lines
+          dendrogram = "none", # No clustering
+          margins = c(8, 8), # Adjust margins for better label visibility
+          cexRow = 0.8, # Font size for row labels
+          cexCol = 0.8, # Font size for column labels
+          cellnote = round(cor_matrix, 2), # Round correlation values to 2 decimal places
+          notecol = "black", # Color of the numbers
+          notecex = 0.8) # Size of the numbers
+
+```
