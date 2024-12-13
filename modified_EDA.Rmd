@@ -587,7 +587,23 @@ kable(correlation_with_target_df, col.names = c("Feature", "Correlation"), align
 
 ```
 From the above correlation we can see that the strongest predictors of Rings are Shell Weight, Diameter, Height, and Length. These features will likely play a significant role in regression or machine learning models.
-While all features show some positive correlation with Rings, Shucked Weight is the weakest and may have limited predictive power.
+While all features show some positive correlation with Rings, Shucked Weight is the weakest and may have limited predictive power.```{r}
+abalone$Sex <- as.factor(abalone$Sex)
+str(abalone, give.attr = FALSE)
+```
+
+```{r}
+library(knitr)
+kable(abalone[1:10,], digits = 4,format = 'markdown')
+```
+
+```{r}
+library(skimr)
+skim(abalone)
+
+
+```
+
 
 ```{r}
 library(reshape2)
