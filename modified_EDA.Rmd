@@ -372,7 +372,7 @@ print(outlier_counts_df, row.names = FALSE)
 Length, Diameter, and Weight variables have moderate outlier counts. These are likely due to natural biological variability in abalone size and weight.
 
 Rings has the highest outlier count,this shows that a significant diversity in abalone age and potentially skewed distribution.
-
+These box plots shows that Males and Females are generally larger and heavier than Infants across all dimensions and weights. The distribution of Rings shows that age is relatively consistent across sexes,while Infants show a slightly lower median and a narrower interquartile range, indicating that younger abalones tend to be smaller and there is some variation and more outliers among the adult groups. These observations suggest that sex is an important categorical factor to consider when analyzing relationships between features and age.
 ```{r}
 # Scatter plots for top features
 for (feature in top_features) {
