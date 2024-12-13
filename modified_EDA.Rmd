@@ -416,3 +416,26 @@ From the above correlation we can see that the strongest predictors of Rings are
 While all features show some positive correlation with Rings, Shucked Weight is the weakest and may have limited predictive power.
 Consider these relationships when selecting features for building models like regression, SVM, or tree-based methods.
 
+```{r}
+
+library(ggplot2)
+for (num_feat in numeric_features) {
+  p <- ggplot(data = abalone, aes_string(x = "Sex", y = num_feat)) +
+    geom_boxplot(fill = "skyblue", outlier.color = "red", outlier.size = 1.5) + # Custom fill color
+    labs(
+      title = paste("Box Plot of", num_feat),
+      x = "Sex",
+      y = num_feat
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+      axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14)
+    )
+  
+  print(p)
+}
+
+
+```
