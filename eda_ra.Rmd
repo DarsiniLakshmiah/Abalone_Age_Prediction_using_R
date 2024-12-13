@@ -236,4 +236,15 @@ abalone_scaled <- scale(abalone_no_sex)
 pca <- prcomp(abalone_scaled)
 summary(pca)
 ```
+
+```{r}
+# Boxplot for outlier detection on Rings
+ggplot(abalone_no_sex, aes(y = Rings)) + 
+  geom_boxplot(fill = "orange", color = "black") + 
+  labs(title = "Rings Outlier Detection", y = "Rings")
+
+
+```
  
+#### Observation:
+- The box plot highlights outliers in the dataset related to rings. It shows that the majority of abalone have ring counts within a certain range, but there are several outliers with significantly higher or lower ring counts.
