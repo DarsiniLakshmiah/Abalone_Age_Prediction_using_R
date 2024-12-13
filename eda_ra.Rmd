@@ -248,3 +248,59 @@ ggplot(abalone_no_sex, aes(y = Rings)) +
  
 #### Observation:
 - The box plot highlights outliers in the dataset related to rings. It shows that the majority of abalone have ring counts within a certain range, but there are several outliers with significantly higher or lower ring counts.
+
+#### Observation:
+- The box plot highlights outliers in the dataset related to rings. It shows that the majority of abalone have ring counts within a certain range, but there are several outliers with significantly higher or lower ring counts.
+
+##################################################################
+####Pair Plot
+
+```{r, fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+ggpairs(abalone, aes(colour = Sex, alpha = 0.8), title="Pairs plot for abalone dataset") + 
+  theme_grey(base_size = 8)
+```
+
+####Observations from Pair Plot :
+
+- First thing to note here is high correlation in data. There seems to be high multicollinearity between the predictors. for example correlation between `Diameter` and `Length` is extremely high (about 98.7).
+
+- Similarly `Whole_weight` seems to be highly correlated with other weight predictors and is the sum of `Shucked_weight`, `Viscera_weight` and `Shell_weight`.
+
+- Secondly, the distributions of predictor `Sex` with factor level value of `female` and `male` are very similar with respect to all other predictors.
+
+- The shape of distribution is also significantly similar for factor levels of `female` and `male`.
+
+- We could think about redefining this feature to define gender as infant vs non-infant (where non-infant = female and male both).
+
+- Most of the abalones rings are between 5 and 15.
+
+
+#### Data quality 
+- **Addition of variables**: We will update the abalone dataset to create new variable named `Infant` which will have values based on original value from `Sex` variable. It will have value of `I`, when `Sex` variable is `I` and `NI` otherwise.
+
+```{r, message=FALSE, warning=FALSE}
+abalone['Infant'] <- ifelse(abalone$Sex == 'I','I','NI')
+abalone$Infant <- as.factor(abalone$Infant)
+abalone$Sex <- as.factor(abalone$Sex)
+```
+
+ - Also we observed that min value of predictor `Height` is 0. Practically this is not possible, we will investigate these observations to look closely.
+
+```{r}
+#Data quality check for height being 0
+kable(abalone[abalone$Height == 0,], digits = 4,format = 'markdown')
+```
+- We see that there are two observations for which `Height` might not be recorded properly as other predictors seems to have valid values. Also if we look at the predictor `Whole_weight`, we see that these values are really small compare to rest of the observation and below first quantile. This tells us that this might not be a data error therefore we can  not exclude these from our dataset.
+
+- We will also add a new variable named `weight.diff`.We can see in the summary that there are four different measure of weight i.e. `Whole_weight`, `Shucked_weight`, `Viscera_weight` and `Shell.weight`. `Whole_weight` is linear function of other weight predictors with unknown mass of water/blood lost from shucking process. 
+
+```{r}
+abalone$weight.diff <- abalone$Whole_weight - (abalone$Viscera_weight + abalone$Shucked_weight + abalone$Shell_weight)
+str(abalone, give.attr = FALSE)
+```
+
+- We see that variable `Whole_weight` should be the linear function of variables `Shucked_weight`, `Viscersa_weight` and `Shell_weight`, and we could write it as `Whole_weight` = `Shucked_weight` + `Viscera_weight`+ `Shell_weight` + unknown mass of water/blood lost from shucking process.
+
+- However when we calculated difference between `Whole_weight` and other weight variables we see that there are `r nrow(abalone[abalone$weight.diff < 0,])` observations that are violating this. i.e. this seems to be a illogical and could be an error while recording data. 
+
+- If we plot the histogram of the newly added `weight.diff` variable, we can see that there are observations when `weight.diff` is negative.
