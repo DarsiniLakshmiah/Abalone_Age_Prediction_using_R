@@ -568,6 +568,28 @@ As it is indicated in the pie chart the distribution is fairly balanced across t
 
 
 ```{r}
+
+correlation_with_target_df <- data.frame(
+  Feature = names(correlation_with_target),
+  Correlation = round(correlation_with_target, 2)  # Round to 2 decimal places
+)
+
+# Order by descending correlation
+correlation_with_target_df <- correlation_with_target_df[order(-correlation_with_target_df$Correlation), ]
+
+
+
+library(knitr)
+
+# Display the correlation table nicely formatted
+kable(correlation_with_target_df, col.names = c("Feature", "Correlation"), align = "c")
+
+
+```
+From the above correlation we can see that the strongest predictors of Rings are Shell Weight, Diameter, Height, and Length. These features will likely play a significant role in regression or machine learning models.
+While all features show some positive correlation with Rings, Shucked Weight is the weakest and may have limited predictive power.
+
+```{r}
 library(reshape2)
 
 numeric_features <- colnames(abalone)[sapply(abalone, is.numeric)]
