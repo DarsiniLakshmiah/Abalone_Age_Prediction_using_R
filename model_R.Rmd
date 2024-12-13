@@ -587,7 +587,7 @@ new_df <- data.frame("Actual no of Rings" = c(sample$Rings),
                      "Actual age of abalone" = c(round(sample$Rings + 1.5)), 
                      "Predicted age of abalone" = round(predicted + 1.5))
 
-kable(new_df, digits = 4,format = 'markdown') 
+kable(new_df, digits = 4,format = "markdown") 
 
 
 
