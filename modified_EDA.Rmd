@@ -439,3 +439,40 @@ for (num_feat in numeric_features) {
 
 
 ```
+
+```{r}
+
+library(ggplot2)
+library(patchwork)
+library(gridExtra)
+library(ggplot2)
+
+numeric_features <- colnames(abalone)[sapply(abalone, is.numeric)]
+
+# Loop through each numeric feature and create Q-Q plots separately
+for (num_feat in numeric_features) {
+  # Generate the Q-Q plot
+  p <- ggplot(data = abalone, aes(sample = .data[[num_feat]])) +
+    stat_qq(color = "skyblue", size = 2) +  # Q-Q plot points
+    stat_qq_line(color = "red", linetype = "dashed", size = 1) +  # Reference line
+    labs(
+      title = paste("Q-Q Plot of", num_feat),
+      x = "Theoretical Quantiles",
+      y = "Sample Quantiles"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+      axis.text = element_text(size = 10),
+      axis.title = element_text(size = 12)
+    )
+  
+  print(p)
+}
+
+```
+Most numeric features, except for Height and the weight variables, exhibit relatively normal behavior in the central range but deviate at the tails.
+
+The Q-Q plot for Rings shows a step-like pattern, reflecting the discrete nature of the variable. While the central portion aligns with the normal distribution line, the tails deviate, particularly on the higher end.
+
+These results suggest the need for potential transformations when modeling variables like weights and Rings to improve normality assumptions.
