@@ -604,6 +604,33 @@ skim(abalone)
 
 ```
 
+```{r}
+library(reshape2)
+
+numeric_features <- colnames(abalone)[sapply(abalone, is.numeric)]
+corr_matrix <- cor(abalone[, numeric_features], use = "complete.obs", method = "pearson")
+mask <- upper.tri(corr_matrix)
+
+
+corr_melt <- melt(corr_matrix)
+corr_melt <- corr_melt[!mask, ]
+
+ggplot(corr_melt, aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "black", linewidth = 1) +  
+  scale_fill_gradient2(low = "red", high = "skyblue", mid = "white", midpoint = 0) +  
+  geom_text(aes(label = sprintf("%.2f", value)), size = 3.5, fontface = "bold", color = "black") + 
+  labs(title = "Correlation Matrix", fill = "Correlation") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0, face = "bold", size = 16, margin = margin(b = 10)),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.text.y = element_text(size = 10),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+
+```
+
 
 ```{r}
 library(reshape2)
