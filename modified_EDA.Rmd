@@ -626,7 +626,15 @@ ggplot(category_counts, aes(x = "", y = Percentage, fill = .data[[categoric_feat
 
 ```
 
-As it is indicated in the pie chart the distribution is fairly balanced across the three categories, with males slightly outnumbering the other two groups. from this we can say that sex-based analysis can be conducted without any major skew between groups.
+
+```{r}
+numeric_features <- abalone %>% 
+  select_if(is.numeric) %>% 
+  colnames()
+numeric_features
+```
+The dataset contains information on 4177 abalones, each described by 9 variables. Below is an overview of the dataset's structure:
+
 
 
 ```{r}
