@@ -133,3 +133,21 @@ ggplot(abalone, aes(x = `Whole weight`, y = Rings, color = Sex)) +
 #### Observation:
 - The scatter plot shows that abalone ring count generally increases with whole weight, though there is considerable variability. Females, infants, and males are color-coded, showing their distribution. This indicates weight might be a significant predictor of age.
 
+
+```{r}
+# Height Distribution by sex (Box plot)
+ggplot(abalone, aes(x = Sex, y = Height, fill = Sex)) +
+  geom_boxplot() +
+  labs(title = "Height Distribution by Sex", x = "Sex", y = "Height")
+```
+#### Observation:
+- The box plot shows the height distribution by sex (F: female, I: infant, M: male). It highlights the median, quartiles, and potential outliers for each category. Males tend to have slightly higher median heights compared to females and infants. This variation in height could be considered when predicting abalone age.
+
+
+```{r}
+# Whole weight vs Cobined Shucked and Viscera Weight (Scatter Plot)
+ggplot(abalone, aes(x = `Whole weight`, y = `Shucked weight` + `Viscera weight`, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Whole Weight vs Combined Shucked and Viscera Weight", x = "Whole Weight", y = "Shucked + Viscera Weight")
+
+```
