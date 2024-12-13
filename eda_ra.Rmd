@@ -207,3 +207,14 @@ heatmap.2(cor_matrix,
           notecex = 0.8) # Size of the numbers
 
 ```
+
+```{r}
+# Plotting histogram for 'Length' and 'Rings'
+ggplot(abalone_no_sex, aes(x = Length)) + geom_histogram(binwidth = 0.5, fill = "blue", color = "black") + 
+  labs(title = "Length Distribution", x = "Length", y = "Frequency")
+
+```
+ 
+#### Observation:
+-The histogram shows the frequency of abalone lengths. Most lengths are centered around 0.5, with very few at the extremes (0.0 and 1.0). This indicates that the abalone in your dataset generally have similar lengths.
+ 
