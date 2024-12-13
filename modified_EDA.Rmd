@@ -476,3 +476,27 @@ Most numeric features, except for Height and the weight variables, exhibit relat
 The Q-Q plot for Rings shows a step-like pattern, reflecting the discrete nature of the variable. While the central portion aligns with the normal distribution line, the tails deviate, particularly on the higher end.
 
 These results suggest the need for potential transformations when modeling variables like weights and Rings to improve normality assumptions.
+
+```{r}
+
+group_1 <- c("Length", "Diameter", "Height","Shell.weight")
+group_2 <- c("Whole.weight", "Shucked.weight","Viscera.weight" ,"Rings")
+
+# First pairs plot
+plot1 <- ggpairs(abalone[, c(group_1, "Sex")], 
+                 aes(colour = Sex, alpha = 0.8),
+                 title = "Pairs Plot - Group 1") +
+  theme_grey(base_size = 8)
+
+# Second pairs plot
+plot2 <- ggpairs(abalone[, c(group_2, "Sex")], 
+                 aes(colour = Sex, alpha = 0.8),
+                 title = "Pairs Plot - Group 2") +
+  theme_grey(base_size = 8)
+
+# Display both plots
+print(plot1)
+print(plot2)
+
+
+```
